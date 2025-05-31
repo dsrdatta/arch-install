@@ -7,3 +7,4 @@ set -e
 ./install_base.sh
 ./chroot_setup.sh
 ./install_grub.sh
+./install_cleanup.sh
