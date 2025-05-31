@@ -1,45 +1,55 @@
 #!/bin/bash
+
 set -e
 
-# Simple logging functions
-log()   { echo "[INFO] $*"; }
-warn()  { echo "[WARN] $*"; }
-error() { echo "[ERROR] $*" >&2; }
+echo "Listing available drives..."
 
-# Ensure running as root
-if [[ $EUID -ne 0 ]]; then
-    error "This script must be run as root."
+# List drives
+drives=($(lsblk -dno NAME,SIZE | awk '{print "/dev/" $1 " (" $2 ")"}'))
+for i in "${!drives[@]}"; do
+    echo "$((i+1))) ${drives[$i]}"
+done
+
+# Select drive
+read -rp "Enter the number of the drive to partition: " choice
+if ! [[ "$choice" =~ ^[0-9]+$ ]] || (( choice < 1 || choice > ${#drives[@]} )); then
+    echo "Invalid selection."
+    exit 1
+fi
+selected_drive=$(echo "${drives[$((choice-1))]}" | awk '{print $1}')
+
+echo "Selected drive: $selected_drive"
+read -rp "Are you sure you want to wipe and partition this drive? [y/N]: " confirm
+if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
+    echo "Cancelled."
     exit 1
 fi
 
-log "Scanning available drives..."
-lsblk -dpno NAME,SIZE | grep -v "loop"
+# Ask for mode
+echo "Choose partitioning mode:"
+echo "1) Auto partition (EFI + SWAP + ROOT)"
+echo "2) Manual partition (open cfdisk)"
+read -rp "Enter choice [1/2]: " mode
 
-echo
-read -rp "[INPUT] Enter the full path of the drive to partition (e.g., /dev/sda): " DRIVE
-
-if [[ ! -b "$DRIVE" ]]; then
-    error "$DRIVE is not a valid block device."
-    exit 1
+if [[ "$mode" == "2" ]]; then
+    echo "Launching cfdisk..."
+    cfdisk "$selected_drive"
+    exit 0
 fi
 
-warn "This will erase all data on $DRIVE!"
-read -rp "Type 'YES' to confirm: " CONFIRM
-if [[ "$CONFIRM" != "YES" ]]; then
-    log "Aborted by user."
-    exit 1
-fi
+echo "Wiping existing partitions..."
+wipefs -af "$selected_drive"
+sgdisk --zap-all "$selected_drive"
 
-echo
-log "Launching cfdisk..."
-echo "--> Create:"
-echo "    1. 800MB EFI System (type: EFI System)"
-echo "    2. 20GB Linux swap (type: Linux swap)"
-echo "    3. Rest as Linux filesystem"
-echo
-read -rp "Press Enter to continue..."
-cfdisk "$DRIVE"
+echo "Creating new GPT partition table..."
+parted -s "$selected_drive" mklabel gpt
 
-echo
-log "Partitioning complete. Layout:"
-lsblk "$DRIVE"
+# Create partitions
+echo "Creating partitions..."
+parted -s "$selected_drive" mkpart ESP fat32 1MiB 801MiB
+parted -s "$selected_drive" set 1 esp on
+parted -s "$selected_drive" mkpart primary linux-swap 801MiB 20801MiB
+parted -s "$selected_drive" mkpart primary ext4 20801MiB 100%
+
+echo "Partitions created on $selected_drive:"
+lsblk "$selected_drive"
