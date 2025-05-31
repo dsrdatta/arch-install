@@ -4,5 +4,6 @@ set -e
 
 ./partition.sh
 ./format_and_mount.sh
-
-echo "Partitioning and formatting complete."
+./install_base
+./chroot_setup.sh
+./install_grub.sh
