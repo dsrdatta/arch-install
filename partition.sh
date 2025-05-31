@@ -4,8 +4,14 @@ set -e
 
 echo "Listing available drives..."
 
-# List drives
-drives=($(lsblk -dno NAME,SIZE | awk '{print "/dev/" $1 " (" $2 ")"}'))
+# Only list full disk devices (exclude loop, partitions, rom)
+mapfile -t drives < <(lsblk -dno NAME,SIZE,TYPE | awk '$3=="disk"{print "/dev/" $1 " (" $2 ")"}')
+
+if [[ ${#drives[@]} -eq 0 ]]; then
+    echo "No usable drives found."
+    exit 1
+fi
+
 for i in "${!drives[@]}"; do
     echo "$((i+1))) ${drives[$i]}"
 done
