@@ -58,4 +58,6 @@ parted -s "$selected_drive" mkpart primary linux-swap 801MiB 20801MiB
 parted -s "$selected_drive" mkpart primary ext4 20801MiB 100%
 
 echo "Partitions created on $selected_drive:"
-lsblk "$selected_drive"
+#lsblk "$selected_drive"
+
+echo "$selected_drive" > drive.conf
