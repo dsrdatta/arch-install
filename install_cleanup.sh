@@ -39,11 +39,14 @@ if [[ -f /mnt/boot/grub/grub.cfg ]]; then
     echo >> "$FINAL_LOG"
 fi
 
+# root into arch for settings permissions
+arch-chroot /mnt /bin/bash <<EOF
+
 # Set permissions on final log
 chown "$NEW_USERNAME:$NEW_USERNAME" "$FINAL_LOG"
 
 # Clone post-setup into user home
-arch-chroot /mnt /bin/bash <<EOF
+
 git clone https://github.com/dsrdatta/arch-install.git /home/$NEW_USERNAME/arch-install
 chown -R $NEW_USERNAME:users /home/$NEW_USERNAME/arch-install
 chmod +x /home/$NEW_USERNAME/arch-install/post_setup.sh
