@@ -10,7 +10,7 @@ SELECTED_DRIVE=$(grep "^DRIVE=" preinstall_summary.txt | cut -d'=' -f2)
 
 # Install base system with selected microcode
 echo -e "${CYAN}Installing base system...${NC}"
-BASE_PACKAGES="base linux linux-firmware git nano btop fastfetch"
+BASE_PACKAGES="base linux linux-firmware networkmanager git nano btop fastfetch"
 
 case "$MICROCODE" in
     intel-ucode)
