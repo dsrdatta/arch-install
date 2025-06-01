@@ -18,6 +18,6 @@ A minimal, modular, and script-driven Arch Linux installation system using seque
    chmod +x *.sh
 
 
-3. **3. **Download the installer** 
+3. **Download the installer** 
     ```bash
     ./install.sh
