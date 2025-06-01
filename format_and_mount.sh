@@ -2,12 +2,20 @@
 
 set -e
 
-if [[ ! -f drive.conf ]]; then
-    echo "drive.conf not found. Run partition.sh first."
+# Load selected drive from .env
+if [[ ! -f .env ]]; then
+    echo ".env file not found. Run pre_install.sh and partition.sh first."
     exit 1
 fi
 
-drive=$(<drive.conf)
+source .env
+
+if [[ -z "$SELECTED_DRIVE" ]]; then
+    echo "SELECTED_DRIVE not set in .env. Run partition.sh first."
+    exit 1
+fi
+
+drive="$SELECTED_DRIVE"
 efi_part="${drive}1"
 swap_part="${drive}2"
 root_part="${drive}3"
@@ -24,4 +32,3 @@ mount "$efi_part" /mnt/boot
 
 echo "Partitions formatted and mounted:"
 lsblk
-``

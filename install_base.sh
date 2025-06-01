@@ -1,16 +1,43 @@
 #!/bin/bash
 set -e
 
-if [[ ! -f drive.conf ]]; then
-    echo "Error: drive.conf not found. Run partition.sh first."
-    exit 1
-fi
+# Load environment variables
+source .env
+selected_drive="$SELECTED_DRIVE"
 
-echo "Installing base system with pacstrap..."
+# Format partitions
+efi_partition="${selected_drive}1"
+swap_partition="${selected_drive}2"
+root_partition="${selected_drive}3"
 
-pacstrap -K /mnt base linux linux-firmware sudo git nano btop fastfetch networkmanager
+echo "Formatting partitions..."
+mkfs.fat -F32 "$efi_partition"
+mkswap "$swap_partition"
+swapon "$swap_partition"
+mkfs.ext4 "$root_partition"
 
-echo "Generating fstab..."
+# Mount root and EFI
+mount "$root_partition" /mnt
+mkdir -p /mnt/boot
+mount "$efi_partition" /mnt/boot
+
+# Install base system with selected microcode
+echo "Installing base system..."
+BASE_PACKAGES="base linux linux-firmware git nano btop fastfetch"
+
+case "$MICROCODE" in
+    intel-ucode)
+        pacstrap -K /mnt $BASE_PACKAGES intel-ucode
+        ;;
+    amd-ucode)
+        pacstrap -K /mnt $BASE_PACKAGES amd-ucode
+        ;;
+    *)
+        pacstrap -K /mnt $BASE_PACKAGES
+        ;;
+esac
+
+# Generate fstab
 genfstab -U /mnt >> /mnt/etc/fstab
 
 echo "Base system installed and fstab generated."

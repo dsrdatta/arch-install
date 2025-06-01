@@ -9,8 +9,8 @@ fi
 
 source .env
 
-if [[ -z "$ROOT_PASSWORD" || -z "$NEW_USERNAME" || -z "$USER_PASSWORD" ]]; then
-    echo "Error: Missing required environment variables (ROOT_PASSWORD, NEW_USERNAME, USER_PASSWORD)"
+if [[ -z "$ROOT_PASSWORD" || -z "$NEW_USERNAME" || -z "$USER_PASSWORD" || -z "$hostname" ]]; then
+    echo "Error: Missing required environment variables (ROOT_PASSWORD, NEW_USERNAME, USER_PASSWORD, hostname)"
     exit 1
 fi
 
@@ -19,7 +19,7 @@ echo "Entering chroot and configuring base system..."
 arch-chroot /mnt /bin/bash <<EOF
 
 # Set timezone
-ln -sf /usr/share/zoneinfo/Asia/Kolkata /etc/localtime
+ln -sf /usr/share/zoneinfo/America/Toronto /etc/localtime
 hwclock --systohc
 
 # Locale
@@ -28,12 +28,12 @@ locale-gen
 echo "LANG=en_US.UTF-8" > /etc/locale.conf
 
 # Hostname and hosts
-echo "archlinux" > /etc/hostname
+echo "$hostname" > /etc/hostname
 
 cat <<HOSTS > /etc/hosts
 127.0.0.1   localhost
 ::1         localhost
-127.0.1.1   archlinux.localdomain archlinux
+127.0.1.1   $hostname.localdomain $hostname
 HOSTS
 
 # Set root password

@@ -1,63 +1,49 @@
 #!/bin/bash
-
 set -e
 
-echo "Listing available drives..."
-
-# Only list full disk devices (exclude loop, partitions, rom)
-mapfile -t drives < <(lsblk -dno NAME,SIZE,TYPE | awk '$3=="disk"{print "/dev/" $1 " (" $2 ")"}')
-
-if [[ ${#drives[@]} -eq 0 ]]; then
-    echo "No usable drives found."
+# Load selected drive and partitioning mode
+if [[ ! -f "preinstall_summary.txt" ]]; then
+    echo "Missing preinstall_summary.txt — run pre_install.sh first."
     exit 1
 fi
 
-for i in "${!drives[@]}"; do
-    echo "$((i+1))) ${drives[$i]}"
-done
+selected_drive=$(grep "^DRIVE=" preinstall_summary.txt | cut -d'=' -f2)
+partition_mode=$(grep "^PARTITION_MODE=" preinstall_summary.txt | cut -d'=' -f2)
 
-# Select drive
-read -rp "Enter the number of the drive to partition: " choice
-if ! [[ "$choice" =~ ^[0-9]+$ ]] || (( choice < 1 || choice > ${#drives[@]} )); then
-    echo "Invalid selection."
+if [[ -z "$selected_drive" || -z "$partition_mode" ]]; then
+    echo "Drive or partitioning mode not found in summary file."
     exit 1
 fi
-selected_drive=$(echo "${drives[$((choice-1))]}" | awk '{print $1}')
 
 echo "Selected drive: $selected_drive"
-read -rp "Are you sure you want to wipe and partition this drive? [y/N]: " confirm
-if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
-    echo "Cancelled."
-    exit 1
-fi
+echo "Partitioning mode: $partition_mode"
 
-# Ask for mode
-echo "Choose partitioning mode:"
-echo "1) Auto partition (EFI + SWAP + ROOT)"
-echo "2) Manual partition (open cfdisk)"
-read -rp "Enter choice [1/2]: " mode
-
-if [[ "$mode" == "2" ]]; then
-    echo "Launching cfdisk..."
+# Manual partitioning
+if [[ "$partition_mode" == "manual" ]]; then
+    echo "Launching cfdisk for manual partitioning..."
     cfdisk "$selected_drive"
-    exit 0
+    echo "Manual partitioning complete."
+else
+    echo "Wiping existing partitions..."
+    wipefs -af "$selected_drive"
+    sgdisk --zap-all "$selected_drive"
+
+    echo "Creating new GPT partition table..."
+    parted -s "$selected_drive" mklabel gpt
+
+    echo "Creating partitions..."
+    parted -s "$selected_drive" mkpart ESP fat32 1MiB 801MiB
+    parted -s "$selected_drive" set 1 esp on
+    parted -s "$selected_drive" mkpart primary linux-swap 801MiB 20801MiB
+    parted -s "$selected_drive" mkpart primary ext4 20801MiB 100%
+
+    echo "Auto partitions created on $selected_drive."
 fi
 
-echo "Wiping existing partitions..."
-wipefs -af "$selected_drive"
-sgdisk --zap-all "$selected_drive"
+# Log post-partition lsblk
+echo "" >> preinstall_summary.txt
+echo "### lsblk after partitioning" >> preinstall_summary.txt
+lsblk >> preinstall_summary.txt
 
-echo "Creating new GPT partition table..."
-parted -s "$selected_drive" mklabel gpt
-
-# Create partitions
-echo "Creating partitions..."
-parted -s "$selected_drive" mkpart ESP fat32 1MiB 801MiB
-parted -s "$selected_drive" set 1 esp on
-parted -s "$selected_drive" mkpart primary linux-swap 801MiB 20801MiB
-parted -s "$selected_drive" mkpart primary ext4 20801MiB 100%
-
-echo "Partitions created on $selected_drive:"
-#lsblk "$selected_drive"
-
-echo "$selected_drive" > drive.conf
+# Save selected drive to separate file if needed
+echo "SELECTED_DRIVE=$selected_drive" >> .env
