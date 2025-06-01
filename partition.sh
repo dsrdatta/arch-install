@@ -25,17 +25,14 @@ echo -e "Partitioning mode: $partition_mode"
 echo "Unmounting any mounted partitions on $selected_drive..."
 mounted_parts=$(lsblk -lnpo NAME,MOUNTPOINT "$selected_drive" | awk '$2 != "" { print $1 }')
 for part in $mounted_parts; do
-    if mountpoint -q "$part"; then
-        echo "Unmounting $part..."
-        umount -f "$part"
-    else
-        echo "$part is not mounted. Skipping."
-    fi
+    echo "Unmounting $part..."
+    umount -f "$part" 2>/dev/null || true
 done
 
-# Disable swap if any
-echo -e "Disabling swap on $selected_drive if any..."
-for part in $(lsblk -lnpo NAME,TYPE "$selected_drive" | awk '$2 == "part" {print $1}'); do
+# Disable swap on any partition of the drive
+echo "Disabling swap on $selected_drive if any..."
+swap_parts=$(lsblk -lnpo NAME "$selected_drive")
+for part in $swap_parts; do
     swapoff "$part" 2>/dev/null || true
 done
 
@@ -58,7 +55,7 @@ else
     parted -s "$selected_drive" mkpart primary linux-swap 801MiB 20801MiB
     parted -s "$selected_drive" mkpart primary ext4 20801MiB 100%
 
-    # Notify kernel of changes
+    echo "Telling kernel to reload partition table..."
     partprobe "$selected_drive" || true
     udevadm settle
 
@@ -71,6 +68,3 @@ fi
     echo "### lsblk after partitioning"
     lsblk
 } >> preinstall_summary.txt
-
-# Save selected drive in .env for next scripts
-#echo "SELECTED_DRIVE=$selected_drive" >> .env
