@@ -1,7 +1,10 @@
 #!/bin/bash
 set -e
 
-echo "Finalizing base installation..."
+CYAN='\033[1;36m'
+NC='\033[0m' # No color
+
+echo "${CYAN}Finalizing base installation...${NC}"
 
 # Load environment variables
 if [[ ! -f .env ]]; then
@@ -37,7 +40,7 @@ if [[ -f /mnt/boot/grub/grub.cfg ]]; then
 fi
 
 # Set permissions on final log
-chown "$NEW_USERNAME:users" "$FINAL_LOG"
+chown "$NEW_USERNAME:$NEW_USERNAME" "$FINAL_LOG"
 
 # Clone post-setup into user home
 arch-chroot /mnt /bin/bash <<EOF

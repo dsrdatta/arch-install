@@ -19,7 +19,7 @@ fi
 
 echo -e "${CYAN}Entering chroot and configuring base system...${NC}"
 
-arch-chroot /mnt /bin/bash <<EOF
+arch-chroot /mnt /bin/bash -e <<EOF
 
 # Set timezone
 ln -sf /usr/share/zoneinfo/America/Toronto /etc/localtime
@@ -43,7 +43,7 @@ HOSTS
 echo "root:$ROOT_PASSWORD" | chpasswd
 
 # Create new user
-useradd -m -g users -G wheel,storage,power,video,audio -s /bin/bash $NEW_USERNAME
+useradd -m -G wheel,storage,power,video,audio -s /bin/bash $NEW_USERNAME
 echo "$NEW_USERNAME:$USER_PASSWORD" | chpasswd
 
 # Enable sudo for wheel group
