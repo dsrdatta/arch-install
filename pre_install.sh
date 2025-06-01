@@ -65,3 +65,10 @@ echo "MICROCODE=$microcode" >> preinstall_summary.txt
 #echo "MICROCODE=$microcode" >> .env
 
 echo -e "${CYAN}Drive and partitioning preferences saved.${NC}"
+
+# Log partition table to summary
+{
+    echo ""
+    echo "### lsblk before partitioning"
+    lsblk
+} >> preinstall_summary.txt

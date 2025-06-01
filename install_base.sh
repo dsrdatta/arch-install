@@ -4,10 +4,6 @@ set -e
 CYAN='\033[1;36m'
 NC='\033[0m' # No color
 
-if [[ -z "$SELECTED_DRIVE" ]]; then
-    echo -e "${CYAN}Error: SELECTED_DRIVE not set. Run partition.sh first.${NC}"
-    exit 1
-fi
 
 # Load environment variables
 SELECTED_DRIVE=$(grep "^DRIVE=" preinstall_summary.txt | cut -d'=' -f2)

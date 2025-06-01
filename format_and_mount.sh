@@ -31,3 +31,11 @@ mount "$efi_part" /mnt/boot
 
 echo -e "${CYAN}Partitions formatted and mounted:${NC}"
 lsblk
+
+
+# Log partition table to summary
+{
+    echo ""
+    echo "### lsblk after partitioning, formatting & mounting"
+    lsblk
+} >> preinstall_summary.txt

@@ -61,10 +61,3 @@ else
 
     echo -e "${CYAN}Auto partitions created on $selected_drive.${NC}"
 fi
-
-# Log partition table to summary
-{
-    echo ""
-    echo "### lsblk after partitioning"
-    lsblk
-} >> preinstall_summary.txt
