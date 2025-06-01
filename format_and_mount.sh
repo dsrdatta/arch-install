@@ -6,12 +6,7 @@ CYAN='\033[1;36m'
 NC='\033[0m' # No color
 
 # Load selected drive from .env
-if [[ ! -f .env ]]; then
-    echo -e "${CYAN}.env file not found. Run pre_install.sh and partition.sh first.${NC}"
-    exit 1
-fi
-
-source .env
+SELECTED_DRIVE=$(grep "^DRIVE=" preinstall_summary.txt | cut -d'=' -f2)
 
 if [[ -z "$SELECTED_DRIVE" ]]; then
     echo -e "${CYAN}SELECTED_DRIVE not set in .env. Run partition.sh first.${NC}"

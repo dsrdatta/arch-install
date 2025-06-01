@@ -1,78 +1,67 @@
 #!/bin/bash
 set -e
 
+# Colors
 CYAN='\033[1;36m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-LOG_FILE="preinstall_summary.txt"
-> "$LOG_FILE" # Clear previous log
+# Detect available drives (excluding loop, rom, etc.)
+mapfile -t drives < <(lsblk -dnp -o NAME,SIZE,TYPE | grep 'disk' | awk '{print $1 " (" $2 ")"}')
 
-echo -e "${CYAN}Logging system state to $LOG_FILE${NC}"
-
-# Log initial lsblk state
-{
-    echo "### Initial lsblk (before partitioning)"
-    lsblk
-    echo ""
-} >> "$LOG_FILE"
-
-echo -e "${CYAN}Detecting available drives...${NC}"
-drives=($(lsblk -dno NAME,SIZE | awk '{print "/dev/" $1 " (" $2 ")"}'))
-
-if [ ${#drives[@]} -eq 0 ]; then
-    echo -e "${CYAN}No drives found.${NC}" && exit 1
+if [[ ${#drives[@]} -eq 0 ]]; then
+    echo -e "${CYAN}No physical drives found.${NC}"
+    exit 1
 fi
 
 echo -e "${CYAN}Available drives:${NC}"
 for i in "${!drives[@]}"; do
-    echo "$((i+1)). ${drives[$i]}"
+    echo -e "${CYAN}[$((i+1))] ${drives[$i]}${NC}"
 done
 
-read -rp "Select drive by number: " drive_index
+read -rp "$(echo -e "${CYAN}Select a drive (1-${#drives[@]}): ${NC}")" drive_index
+
 if ! [[ "$drive_index" =~ ^[0-9]+$ ]] || (( drive_index < 1 || drive_index > ${#drives[@]} )); then
-    echo -e "${CYAN}Invalid selection.${NC}" && exit 1
+    echo -e "${CYAN}Invalid selection.${NC}"
+    exit 1
 fi
 
+# Extract drive name (e.g., /dev/sda)
 selected_drive=$(echo "${drives[$((drive_index-1))]}" | awk '{print $1}')
 
-echo -e "${CYAN}Selected drive: $selected_drive${NC}"
-echo "DRIVE=$selected_drive" >> "$LOG_FILE"
+# Ask for partitioning mode
+echo -e "${CYAN}Partitioning modes:${NC}"
+echo -e "${CYAN}[1] Auto${NC}"
+echo -e "${CYAN}[2] Manual (uses cfdisk)${NC}"
+read -rp "$(echo -e "${CYAN}Select partitioning mode [1-2]: ${NC}")" mode
 
-echo -e "${CYAN}Choose partitioning mode:${NC}"
-echo "1. Automatic (EFI 800M, Swap 20G, Root rest)"
-echo "2. Manual"
-read -rp "Select partitioning mode (1/2): " part_mode
-
-case "$part_mode" in
-    1) partitioning_mode="automatic" ;;
-    2) partitioning_mode="manual" ;;
-    *) echo -e "${CYAN}Invalid selection${NC}"; exit 1 ;;
+case "$mode" in
+    1) partition_mode="auto" ;;
+    2) partition_mode="manual" ;;
+    *) echo -e "${CYAN}Invalid selection.${NC}"; exit 1 ;;
 esac
 
-echo "PARTITION_MODE=$partitioning_mode" >> "$LOG_FILE"
+# Optional microcode selection
+echo -e "${CYAN}CPU Microcode:${NC}"
+echo -e "${CYAN}[1] Intel${NC}"
+echo -e "${CYAN}[2] AMD${NC}"
+echo -e "${CYAN}[3] Skip${NC}"
+read -rp "$(echo -e "${CYAN}Select microcode option [1-3]: ${NC}")" microcode_choice
 
-if [ "$partitioning_mode" == "automatic" ]; then
-    echo "Partition layout will be: 800M EFI, 20G Swap, rest Root" >> "$LOG_FILE"
-fi
-
-echo -e "${CYAN}Choose CPU type for microcode installation:${NC}"
-echo "1. Intel"
-echo "2. AMD"
-echo "3. Skip microcode"
-read -rp "Select option (1/2/3): " cpu_type
-
-case "$cpu_type" in
+case "$microcode_choice" in
     1) microcode="intel-ucode" ;;
     2) microcode="amd-ucode" ;;
-    3) microcode="none" ;;
-    *) echo -e "${CYAN}Invalid selection${NC}"; exit 1 ;;
+    3) microcode="" ;;
+    *) echo -e "${CYAN}Invalid selection.${NC}"; exit 1 ;;
 esac
 
-# Store to both .env and log file
-echo "MICROCODE=$microcode" >> .env
-echo "MICROCODE=$microcode" >> "$LOG_FILE"
+# Save configuration
+echo "DRIVE=$selected_drive" > preinstall_summary.txt
+echo "PARTITION_MODE=$partition_mode" >> preinstall_summary.txt
+echo "MICROCODE=$microcode" >> preinstall_summary.txt
 
-echo -e "\n### You should now run the partitioning script." >> "$LOG_FILE"
-echo "### The post-partition lsblk will be logged after partitioning." >> "$LOG_FILE"
+# Also save to .env for other scripts
+#echo "SELECTED_DRIVE=$selected_drive" > .env
+#echo "PARTITION_MODE=$partition_mode" >> .env
+#echo "MICROCODE=$microcode" >> .env
 
-echo -e "${CYAN}Pre-installation selections saved to $LOG_FILE${NC}"
+echo -e "${CYAN}Drive and partitioning preferences saved.${NC}"

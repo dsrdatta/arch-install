@@ -21,22 +21,31 @@ fi
 echo -e "${CYAN}Selected drive: $selected_drive${NC}"
 echo -e "${CYAN}Partitioning mode: $partition_mode${NC}"
 
-# Unmount existing mounts if any
-echo -e "${CYAN}Checking for mounted partitions to unmount...${NC}"
-umount -R "$selected_drive"* 2>/dev/null || true
-swapoff "$selected_drive"2 2>/dev/null || true
+# Unmount any mounted partitions under the selected drive
+echo -e "${CYAN}Unmounting any mounted partitions on $selected_drive...${NC}"
+mounted_parts=$(lsblk -lnpo NAME,MOUNTPOINT "$selected_drive" | awk '$2 != "" { print $1 }')
+for part in $mounted_parts; do
+    echo -e "${CYAN}Unmounting $part...${NC}"
+    umount -f "$part"
+done
 
-# Manual partitioning
+# Disable swap if any
+echo -e "${CYAN}Disabling swap on $selected_drive if any...${NC}"
+for part in $(lsblk -lnpo NAME,TYPE "$selected_drive" | awk '$2 == "part" {print $1}'); do
+    swapoff "$part" 2>/dev/null || true
+done
+
+# Manual or Auto partitioning
 if [[ "$partition_mode" == "manual" ]]; then
     echo -e "${CYAN}Launching cfdisk for manual partitioning...${NC}"
     cfdisk "$selected_drive"
     echo -e "${CYAN}Manual partitioning complete.${NC}"
 else
-    echo -e "${CYAN}Wiping existing partitions on $selected_drive...${NC}"
+    echo -e "${CYAN}Wiping existing partition data...${NC}"
     wipefs -af "$selected_drive"
     sgdisk --zap-all "$selected_drive"
 
-    echo -e "${CYAN}Creating new GPT partition table...${NC}"
+    echo -e "${CYAN}Creating GPT partition table...${NC}"
     parted -s "$selected_drive" mklabel gpt
 
     echo -e "${CYAN}Creating partitions...${NC}"
@@ -48,12 +57,12 @@ else
     echo -e "${CYAN}Auto partitions created on $selected_drive.${NC}"
 fi
 
-# Log post-partition lsblk
+# Log partition table to summary
 {
     echo ""
     echo "### lsblk after partitioning"
     lsblk
 } >> preinstall_summary.txt
 
-# Save to .env for future scripts
-echo "SELECTED_DRIVE=$selected_drive" >> .env
+# Save selected drive in .env for next scripts
+#echo "SELECTED_DRIVE=$selected_drive" >> .env
