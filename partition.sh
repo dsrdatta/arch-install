@@ -18,19 +18,23 @@ if [[ -z "$selected_drive" || -z "$partition_mode" ]]; then
     exit 1
 fi
 
-echo -e "${CYAN}Selected drive: $selected_drive${NC}"
-echo -e "${CYAN}Partitioning mode: $partition_mode${NC}"
+echo -e "Selected drive: $selected_drive"
+echo -e "Partitioning mode: $partition_mode"
 
 # Unmount any mounted partitions under the selected drive
-echo -e "${CYAN}Unmounting any mounted partitions on $selected_drive...${NC}"
+echo "Unmounting any mounted partitions on $selected_drive..."
 mounted_parts=$(lsblk -lnpo NAME,MOUNTPOINT "$selected_drive" | awk '$2 != "" { print $1 }')
 for part in $mounted_parts; do
-    echo -e "${CYAN}Unmounting $part...${NC}"
-    umount -f "$part"
+    if mountpoint -q "$part"; then
+        echo "Unmounting $part..."
+        umount -f "$part"
+    else
+        echo "$part is not mounted. Skipping."
+    fi
 done
 
 # Disable swap if any
-echo -e "${CYAN}Disabling swap on $selected_drive if any...${NC}"
+echo -e "Disabling swap on $selected_drive if any..."
 for part in $(lsblk -lnpo NAME,TYPE "$selected_drive" | awk '$2 == "part" {print $1}'); do
     swapoff "$part" 2>/dev/null || true
 done

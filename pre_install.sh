@@ -51,7 +51,7 @@ case "$microcode_choice" in
     1) microcode="intel-ucode" ;;
     2) microcode="amd-ucode" ;;
     3) microcode="" ;;
-    *) echo -e "${CYAN}Invalid selection.${NC}"; exit 1 ;;
+    *) echo -e "Invalid selection."; exit 1 ;;
 esac
 
 # Save configuration
