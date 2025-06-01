@@ -9,7 +9,7 @@ NC='\033[0m' # No color
 SELECTED_DRIVE=$(grep "^DRIVE=" preinstall_summary.txt | cut -d'=' -f2)
 
 if [[ -z "$SELECTED_DRIVE" ]]; then
-    echo -e "${CYAN}SELECTED_DRIVE not set in .env. Run partition.sh first.${NC}"
+    echo -e "${CYAN}Error: SELECTED_DRIVE not set. Run partition.sh first.${NC}"
     exit 1
 fi
 

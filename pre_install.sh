@@ -13,12 +13,12 @@ if [[ ${#drives[@]} -eq 0 ]]; then
     exit 1
 fi
 
-echo -e "${CYAN}Available drives:${NC}"
+echo -e "Available drives:"
 for i in "${!drives[@]}"; do
-    echo -e "${CYAN}[$((i+1))] ${drives[$i]}${NC}"
+    echo -e "[$((i+1))] ${drives[$i]}"
 done
 
-read -rp "$(echo -e "${CYAN}Select a drive (1-${#drives[@]}): ${NC}")" drive_index
+read -rp "$(echo -e "Select a drive (1-${#drives[@]}): ")" drive_index
 
 if ! [[ "$drive_index" =~ ^[0-9]+$ ]] || (( drive_index < 1 || drive_index > ${#drives[@]} )); then
     echo -e "${CYAN}Invalid selection.${NC}"
@@ -29,10 +29,10 @@ fi
 selected_drive=$(echo "${drives[$((drive_index-1))]}" | awk '{print $1}')
 
 # Ask for partitioning mode
-echo -e "${CYAN}Partitioning modes:${NC}"
-echo -e "${CYAN}[1] Auto${NC}"
-echo -e "${CYAN}[2] Manual (uses cfdisk)${NC}"
-read -rp "$(echo -e "${CYAN}Select partitioning mode [1-2]: ${NC}")" mode
+echo -e "Partitioning modes:"
+echo -e "[1] Auto"
+echo -e "[2] Manual (uses cfdisk)"
+read -rp "$(echo -e "Select partitioning mode [1-2]: ")" mode
 
 case "$mode" in
     1) partition_mode="auto" ;;
@@ -41,11 +41,11 @@ case "$mode" in
 esac
 
 # Optional microcode selection
-echo -e "${CYAN}CPU Microcode:${NC}"
-echo -e "${CYAN}[1] Intel${NC}"
-echo -e "${CYAN}[2] AMD${NC}"
-echo -e "${CYAN}[3] Skip${NC}"
-read -rp "$(echo -e "${CYAN}Select microcode option [1-3]: ${NC}")" microcode_choice
+echo -e "CPU Microcode:"
+echo -e "[1] Intel"
+echo -e "[2] AMD"
+echo -e "[3] Skip"
+read -rp "$(echo -e "Select microcode option [1-3]: ")" microcode_choice
 
 case "$microcode_choice" in
     1) microcode="intel-ucode" ;;
