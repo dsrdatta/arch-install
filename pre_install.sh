@@ -29,12 +29,12 @@ for i in "${!drives[@]}"; do
 done
 
 read -rp "Select drive by number: " drive_index
-
 if ! [[ "$drive_index" =~ ^[0-9]+$ ]] || (( drive_index < 1 || drive_index > ${#drives[@]} )); then
     echo -e "${CYAN}Invalid selection.${NC}" && exit 1
 fi
 
 selected_drive=$(echo "${drives[$((drive_index-1))]}" | awk '{print $1}')
+
 echo -e "${CYAN}Selected drive: $selected_drive${NC}"
 echo "DRIVE=$selected_drive" >> "$LOG_FILE"
 

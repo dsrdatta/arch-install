@@ -21,6 +21,11 @@ fi
 echo -e "${CYAN}Selected drive: $selected_drive${NC}"
 echo -e "${CYAN}Partitioning mode: $partition_mode${NC}"
 
+# Unmount existing mounts if any
+echo -e "${CYAN}Checking for mounted partitions to unmount...${NC}"
+umount -R "$selected_drive"* 2>/dev/null || true
+swapoff "$selected_drive"2 2>/dev/null || true
+
 # Manual partitioning
 if [[ "$partition_mode" == "manual" ]]; then
     echo -e "${CYAN}Launching cfdisk for manual partitioning...${NC}"
