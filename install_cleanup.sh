@@ -55,8 +55,7 @@ EOF
 # Clean mount points and sync disk
 echo "Cleaning up..."
 sync
-umount -R /mnt || echo "Warning: Failed to unmount /mnt"
-swapoff "$SELECTED_DRIVE"2 2>/dev/null || true
+umount -lR /mnt
 
 echo "System ready. Rebooting in 5 seconds..."
 sleep 5
