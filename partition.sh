@@ -58,6 +58,10 @@ else
     parted -s "$selected_drive" mkpart primary linux-swap 801MiB 20801MiB
     parted -s "$selected_drive" mkpart primary ext4 20801MiB 100%
 
+    # Notify kernel of changes
+    partprobe "$selected_drive" || true
+    udevadm settle
+
     echo -e "${CYAN}Auto partitions created on $selected_drive.${NC}"
 fi
 
