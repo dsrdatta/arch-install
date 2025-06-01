@@ -43,7 +43,7 @@ fi
 arch-chroot /mnt /bin/bash <<EOF
 
 # Set permissions on final log
-chown "$NEW_USERNAME:users" "$FINAL_LOG"
+chown $NEW_USERNAME:users $FINAL_LOG
 
 # Clone post-setup into user home
 git clone https://github.com/dsrdatta/arch-install.git /home/$NEW_USERNAME/arch-install

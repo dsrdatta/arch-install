@@ -13,22 +13,18 @@ if [ "$(whoami)" != "$NEW_USERNAME" ]; then
     exit 1
 fi
 
-echo -e "${CYAN}Updating system and installing packages...${NC}"
-
-# Update system
+echo -e "${CYAN}Updating system...${NC}"
 sudo pacman -Syu --noconfirm
 
-# Install essential packages
+echo -e "${CYAN}Installing essential packages...${NC}"
 sudo pacman -S --noconfirm \
+    base-devel \
     kitty \
     dolphin \
     fastfetch \
     btop \
     git \
     nano
-    # Uncomment below if needed
-    # network-manager-applet \
-    # base-devel
 
 # Install yay if not already installed
 if ! command -v yay &>/dev/null; then
@@ -39,7 +35,7 @@ if ! command -v yay &>/dev/null; then
     makepkg -si --noconfirm
 fi
 
-# Install AUR packages with yay
+# Install AUR packages
 yay -S --noconfirm brave-bin
 
 echo -e "${CYAN}Post-setup complete.${NC}"
