@@ -26,14 +26,16 @@ sudo pacman -S --noconfirm \
     git \
     nano
 
-# Install yay if not already installed
-if ! command -v yay &>/dev/null; then
-    echo -e "${CYAN}Installing yay (AUR helper)...${NC}"
-    cd /tmp
-    git clone https://aur.archlinux.org/yay.git
-    cd yay
-    makepkg -si --noconfirm
-fi
+# Create and switch to a temp dir
+cd /tmp
+git clone https://aur.archlinux.org/yay.git
+cd yay
+
+# Build yay (no root required)
+makepkg -s --noconfirm
+
+# Install the resulting package as root
+sudo pacman -U --noconfirm yay-*.pkg.tar.zst
 
 # Install AUR packages
 yay -S --noconfirm brave-bin
