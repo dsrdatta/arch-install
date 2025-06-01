@@ -1,16 +1,19 @@
 #!/bin/bash
 set -e
 
+CYAN='\033[1;36m'
+NC='\033[0m' # No color
+
 # Load NEW_USERNAME from .env
 source ~/arch-install/.env
 
 # Ensure script is run by correct user
 if [ "$(whoami)" != "$NEW_USERNAME" ]; then
-    echo "Please run this script as the user: $NEW_USERNAME"
+    echo -e "${CYAN}Please run this script as the user: $NEW_USERNAME${NC}"
     exit 1
 fi
 
-echo "Updating system and installing packages..."
+echo -e "${CYAN}Updating system and installing packages...${NC}"
 
 # Update system
 sudo pacman -Syu --noconfirm
@@ -21,22 +24,22 @@ sudo pacman -S --noconfirm \
     dolphin \
     fastfetch \
     btop \
-    fastfetch \
     git \
-    nano 
-    #network-manager-applet \
-    #base-devel
+    nano
+    # Uncomment below if needed
+    # network-manager-applet \
+    # base-devel
 
 # Install yay if not already installed
 if ! command -v yay &>/dev/null; then
-    echo "Installing yay (AUR helper)..."
+    echo -e "${CYAN}Installing yay (AUR helper)...${NC}"
     cd /tmp
     git clone https://aur.archlinux.org/yay.git
     cd yay
     makepkg -si --noconfirm
 fi
 
-# Optional: install AUR packages via yay
+# Install AUR packages with yay
 yay -S --noconfirm brave-bin
 
-echo "Post-setup complete."
+echo -e "${CYAN}Post-setup complete.${NC}"

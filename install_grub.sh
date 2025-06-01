@@ -1,3 +1,11 @@
+#!/bin/bash
+set -e
+
+CYAN='\033[1;36m'
+NC='\033[0m' # No color
+
+echo -e "${CYAN}Installing GRUB bootloader...${NC}"
+
 arch-chroot /mnt /bin/bash <<EOF
 
 # Install GRUB and EFI tools
@@ -11,4 +19,4 @@ grub-mkconfig -o /boot/grub/grub.cfg
 
 EOF
 
-echo "✔️ GRUB bootloader installed."
+echo -e "${CYAN}GRUB bootloader installation complete.${NC}"

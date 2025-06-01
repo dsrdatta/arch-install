@@ -1,20 +1,23 @@
 #!/bin/bash
 set -e
 
+CYAN='\033[1;36m'
+NC='\033[0m' # No color
+
 # Load environment variables
 if [[ ! -f .env ]]; then
-    echo "Error: .env file not found!"
+    echo -e "${CYAN}Error: .env file not found!${NC}"
     exit 1
 fi
 
 source .env
 
 if [[ -z "$ROOT_PASSWORD" || -z "$NEW_USERNAME" || -z "$USER_PASSWORD" || -z "$hostname" ]]; then
-    echo "Error: Missing required environment variables (ROOT_PASSWORD, NEW_USERNAME, USER_PASSWORD, hostname)"
+    echo -e "${CYAN}Error: Missing required environment variables (ROOT_PASSWORD, NEW_USERNAME, USER_PASSWORD, hostname)${NC}"
     exit 1
 fi
 
-echo "Entering chroot and configuring base system..."
+echo -e "${CYAN}Entering chroot and configuring base system...${NC}"
 
 arch-chroot /mnt /bin/bash <<EOF
 
@@ -51,4 +54,4 @@ systemctl enable NetworkManager
 
 EOF
 
-echo "✔️ chroot configuration complete: locale, user, root password, hostname, sudo setup"
+echo -e "${CYAN}Chroot configuration complete: locale, user, root password, hostname, sudo setup${NC}"
