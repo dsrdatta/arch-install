@@ -43,10 +43,9 @@ fi
 arch-chroot /mnt /bin/bash <<EOF
 
 # Set permissions on final log
-chown "$NEW_USERNAME:$NEW_USERNAME" "$FINAL_LOG"
+chown "$NEW_USERNAME:users" "$FINAL_LOG"
 
 # Clone post-setup into user home
-
 git clone https://github.com/dsrdatta/arch-install.git /home/$NEW_USERNAME/arch-install
 chown -R $NEW_USERNAME:users /home/$NEW_USERNAME/arch-install
 chmod +x /home/$NEW_USERNAME/arch-install/post_setup.sh
@@ -58,5 +57,5 @@ sync
 umount -lR /mnt
 
 echo "System ready. Rebooting in 5 seconds..."
-sleep 5
-reboot
+#sleep 5
+#reboot

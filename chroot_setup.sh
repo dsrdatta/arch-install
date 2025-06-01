@@ -43,7 +43,7 @@ HOSTS
 echo "root:$ROOT_PASSWORD" | chpasswd
 
 # Create new user
-useradd -m -G wheel,storage,power,video,audio -s /bin/bash $NEW_USERNAME
+useradd -m -g users -G wheel,storage,power,video,audio -s /bin/bash $NEW_USERNAME
 echo "$NEW_USERNAME:$USER_PASSWORD" | chpasswd
 
 # Enable sudo for wheel group
