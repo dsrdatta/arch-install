@@ -7,12 +7,6 @@ NC='\033[0m' # No color
 # Load NEW_USERNAME from .env
 source ~/arch-install/.env
 
-# Ensure script is run by correct user
-if [ "$(whoami)" != "$NEW_USERNAME" ]; then
-    echo -e "${CYAN}Please run this script as the user: $NEW_USERNAME${NC}"
-    exit 1
-fi
-
 echo -e "${CYAN}Updating system...${NC}"
 sudo pacman -Syu --noconfirm
 
