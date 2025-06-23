@@ -9,6 +9,7 @@ sudo pacman -Syu --noconfirm
 
 echo -e "${CYAN}Installing essential packages...${NC}"
 sudo pacman -S --noconfirm \
+    base-devel \
     kitty \
     fastfetch \
     btop \
@@ -20,10 +21,19 @@ sudo pacman -S --noconfirm \
     stow \
     tmux \
     unzip \
+    fzf \
     yazi \
+    curl \
     zoxide \
     zsh \
-    zsh-completions
+    zsh-completions \
+    nodejs \
+    npm \
+    go \
+    gcc \
+    base-devel \
+    lua \
+    luarocks
 
 # Create and switch to a temp dir
 cd /tmp
@@ -37,9 +47,21 @@ makepkg -s --noconfirm
 sudo pacman -U --noconfirm yay-*.pkg.tar.zst
 
 # Clone the arch-install repo if it doesn't exist
-if [ ! -d ~/arch-install ]; then
+if [ ! -d ~/dotfiles ]; then
     echo -e "${CYAN}Cloning dotfiles repo...${NC}"
     git clone https://github.com/dsrdatta/hyprdotfiles ~/dotfiles
 fi
+
+# Symlink all config directories from ~/dotfiles/config/* into $HOME
+echo -e "${CYAN}Stowing dotfiles into \$HOME...${NC}"
+cd ~/dotfiles/configs
+stow --target=$HOME */
+cd
+
+# Set Zsh as the default shell for the current user
+echo -e "${CYAN}Setting Zsh as default shell...${NC}"
+sudo pacman -S --noconfirm which
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+chsh -s $(which zsh)
 
 echo -e "${CYAN}Cloud-init Post-setup complete.${NC}"
