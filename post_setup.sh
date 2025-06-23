@@ -18,7 +18,15 @@ sudo pacman -S --noconfirm \
     btop \
     git \
     nano \
-    neovim
+    neovim \
+    rsync \
+    stow \
+    tmux \
+    unzip \
+    yazi \
+    zoxide \
+    zsh \
+    zsh-completions
 
 # Create and switch to a temp dir
 cd /tmp
@@ -32,6 +40,6 @@ makepkg -s --noconfirm
 sudo pacman -U --noconfirm yay-*.pkg.tar.zst
 
 # Install AUR packages
-yay -S --noconfirm brave-bin
+# yay -S --noconfirm brave-bin
 
 echo -e "${CYAN}Post-setup complete.${NC}"
