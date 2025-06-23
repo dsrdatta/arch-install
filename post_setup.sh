@@ -14,11 +14,11 @@ echo -e "${CYAN}Installing essential packages...${NC}"
 sudo pacman -S --noconfirm \
     base-devel \
     kitty \
-    dolphin \
     fastfetch \
     btop \
     git \
-    nano
+    nano \
+    neovim
 
 # Create and switch to a temp dir
 cd /tmp
