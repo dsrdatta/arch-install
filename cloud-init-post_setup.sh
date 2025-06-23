@@ -36,4 +36,10 @@ makepkg -s --noconfirm
 # Install the resulting package as root
 sudo pacman -U --noconfirm yay-*.pkg.tar.zst
 
+# Clone the arch-install repo if it doesn't exist
+if [ ! -d ~/arch-install ]; then
+    echo -e "${CYAN}Cloning dotfiles repo...${NC}"
+    git clone https://github.com/dsrdatta/hyprdotfiles ~/dotfiles
+fi
+
 echo -e "${CYAN}Cloud-init Post-setup complete.${NC}"
