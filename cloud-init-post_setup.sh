@@ -57,11 +57,17 @@ echo -e "${CYAN}Stowing dotfiles into \$HOME...${NC}"
 cd ~/dotfiles/configs
 stow --target=$HOME */
 cd
+if [ ! -d ~/.tmux/plugins/tpm ]; then
+    git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+fi
 
 # Set Zsh as the default shell for the current user
 echo -e "${CYAN}Setting Zsh as default shell...${NC}"
 sudo pacman -S --noconfirm which
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 chsh -s $(which zsh)
+
+# Add Go to my shell path
+export PATH="$HOME/go/bin:$PATH"
 
 echo -e "${CYAN}Cloud-init Post-setup complete.${NC}"
