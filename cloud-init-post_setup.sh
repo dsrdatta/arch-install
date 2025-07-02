@@ -33,7 +33,9 @@ sudo pacman -S --noconfirm \
     gcc \
     base-devel \
     lua \
-    luarocks
+    luarocks \
+    pacman-contrib \
+    ncdu
 
 # Create and switch to a temp dir
 cd /tmp
