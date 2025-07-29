@@ -26,6 +26,7 @@ sudo pacman -S --noconfirm \
     curl \
     zoxide \
     zsh \
+    lsd \
     zsh-completions \
     nodejs \
     npm \
@@ -35,7 +36,8 @@ sudo pacman -S --noconfirm \
     lua \
     luarocks \
     pacman-contrib \
-    ncdu
+    ncdu \
+    docker
 
 # Create and switch to a temp dir
 cd /tmp
@@ -57,6 +59,8 @@ fi
 # Symlink all config directories from ~/dotfiles/config/* into $HOME
 echo -e "${CYAN}Stowing dotfiles into \$HOME...${NC}"
 cd ~/dotfiles/configs
+# Delete some unrequired dots
+rm -rf hypr waybar
 stow --target=$HOME */
 cd
 if [ ! -d ~/.tmux/plugins/tpm ]; then
@@ -68,8 +72,8 @@ echo -e "${CYAN}Setting Zsh as default shell...${NC}"
 sudo pacman -S --noconfirm which
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 chsh -s $(which zsh)
-
-# Add Go to my shell path
-export PATH="$HOME/go/bin:$PATH"
+SOURCE_LINE="source ~/myzsh.zsh"
+echo "$SOURCE_LINE" >>"$ZSHRC"
+echo "${CYAN}Added sourcing line to $ZSHRC.${NC}"
 
 echo -e "${CYAN}Cloud-init Post-setup complete.${NC}"
